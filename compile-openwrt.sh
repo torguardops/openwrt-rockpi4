@@ -63,7 +63,7 @@ make defconfig
 
 cp -R ${BASEDIR}/files .
 
-make download V=s
-make tools/install -j$(nproc) V=s
-make toolchain/install -j$(nproc) V=s
-make -j$(nproc) V=s
+make -j $(nproc) kernel_menuconfig
+ 
+# Build the firmware image
+make -j $(nproc) defconfig download clean world V=s
