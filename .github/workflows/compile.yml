@@ -1,0 +1,49 @@
+name: Build OpenWRT RockPi 4
+on: [push]
+
+jobs:
+    build:
+        name: Build OpenWRT RockPi 4
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            
+            - name: Run Build Script
+              run: bash compile-openwrt.sh
+
+            - name: TAR Output
+              run: tar -cvf rockpi4-images.tar openwrt/bin/targets/rockchip/armv8
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                name: rockpi4-images
+                path: rockpi4-images.tar
+          
+    release:
+          name: Make a release
+          runs-on: ubuntu-latest
+          needs: build
+
+          steps:
+            - name: Download the image artifacts
+              uses: actions/download-artifact@v2
+              with:
+                name: rockpi4-images
+
+            - name: Extract the image artifacts
+              run: tar xf rockpi4-images.tar
+
+            - name: Get the current date
+              run: echo "NOW=$(date +%F)" >> $GITHUB_ENV
+
+            - name: Create a release
+              uses: "marvinpinto/action-automatic-releases@latest"
+              with:
+                repo_token: "${{ secrets.GITHUB_TOKEN }}"
+                prerelease: true
+                title: "Updated prebuilt images ${{ env.NOW }}"
+                automatic_release_tag: "rockchip-armv8-${{ env.NOW }}"
+                files: openwrt/bin/targets/rockchip/armv8/*

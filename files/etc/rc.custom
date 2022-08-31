@@ -1,0 +1,37 @@
+#!/bin/sh
+# /etc/rc.custom PrivateRouter Custom Startup Script
+
+START=99
+
+echo "nameserver 1.1.1.1" > /etc/resolv.conf
+# Set this to 0 to disable Tankman theme
+TANKMAN_FLAG=1
+
+# Verify we are connected to the Internet
+is_connected() {
+    ping -q -c3 1.1.1.1 >/dev/null 2>&1
+    return $?
+}
+
+
+[ is_connected ] && [ ${TANKMAN_FLAG} = "1" ] && [ ! -f "/usr/lib/opkg/info/tankman.list" ] && {
+
+	#Install Argon Tankman theme
+	opkg install /etc/luci-theme-argon*.ipk
+	opkg install /etc/luci-app-argon*.ipk
+
+	tar xzvf /etc/logo.tar.gz -C /www/luci-static/argon/
+	tar xzvf /etc/dockerman.tar.gz -C /usr/lib/lua/luci/model/cbi/dockerman/
+
+	# Marker set so we know theme has been installed
+	touch /usr/lib/opkg/info/tankman.list
+
+}
+
+[ is_connected ] && {
+	opkg update
+	chmod a+x /etc/update.sh
+	/etc/update.sh || exit 1   # Run Router Pacakge Update Process
+}
+
+exit 0

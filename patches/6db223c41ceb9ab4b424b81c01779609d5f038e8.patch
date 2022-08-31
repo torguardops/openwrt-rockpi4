@@ -1,0 +1,37 @@
+From 6db223c41ceb9ab4b424b81c01779609d5f038e8 Mon Sep 17 00:00:00 2001
+From: Marty Jones <mj8263788@gmail.com>
+Date: Sun, 31 Jan 2021 14:38:59 -0500
+Subject: [PATCH] rockchip: enable WiFi on Rock pi 4
+
+Signed-off-by: Marty Jones <mj8263788@gmail.com>
+---
+ package/kernel/mac80211/broadcom.mk  | 1 +
+ target/linux/rockchip/image/armv8.mk | 4 ++++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/package/kernel/mac80211/broadcom.mk b/package/kernel/mac80211/broadcom.mk
+index fb576c5809aae..0e2db6a749315 100644
+--- a/package/kernel/mac80211/broadcom.mk
++++ b/package/kernel/mac80211/broadcom.mk
+@@ -450,6 +450,7 @@ define KernelPackage/brcmfmac/config
+ 	config BRCMFMAC_SDIO
+ 		bool "Enable SDIO bus interface support"
+ 		default y if TARGET_bcm27xx
++		default y if TARGET_rockchip
+ 		default y if TARGET_sunxi
+ 		default n
+ 		help
+diff --git a/target/linux/rockchip/image/armv8.mk b/target/linux/rockchip/image/armv8.mk
+index 24b1c38137a4e..cd8e9a54522bf 100644
+--- a/target/linux/rockchip/image/armv8.mk
++++ b/target/linux/rockchip/image/armv8.mk
+@@ -28,5 +28,9 @@ define Device/radxa_rock-pi-4
+   SUPPORTED_DEVICES := radxa,rockpi4
+   UBOOT_DEVICE_NAME := rock-pi-4-rk3399
+   IMAGE/sysupgrade.img.gz := boot-common | boot-script | pine64-img | gzip | append-metadata
++  DEVICE_PACKAGES := \
++	brcmfmac-firmware-43456-sdio \
++	brcmfmac-firmware-43456-sdio-rockpi-4 \
++	kmod-brcmfmac wpad-basic
+ endef
+ TARGET_DEVICES += radxa_rock-pi-4
