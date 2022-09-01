@@ -1,24 +1,56 @@
 #!/usr/bin/env bash
 
-BASEDIR=${PWD}
+BASEDIR="${PWD}"
+TESTING=1
+OPENWRT_VERSION='21.02.3'
 
-[ -d "${BASEDIR}/openwrt" ] && rm -rf "${BASEDIR}/openwrt"
+# Bash Color mapping
+grey='\e[1;30m'
+red='\e[0;31m'
+RED='\e[1;31m'
+green='\e[0;32m'
+GREEN='\e[1;32m'
+yellow='\e[0;33m'
+YELLOW='\e[1;33m'
+purple='\e[0;35m'
+PURPLE='\e[1;35m'
+white='\e[0;37m'
+WHITE='\e[1;37m'
+blue='\e[0;34m'
+BLUE='\e[1;34m'
+cyan='\e[0;36m'
+CYAN='\e[1;36m'
+NC='\e[0m'
 
+say() {
+    echo -e "${RED}[${yellow}*** ${CYAN}${1} ${yellow}***${RED}]${NC}"
+}
+
+[ -d "${BASEDIR}/openwrt" ] && { say "Deleting existing openwrt directory"; rm -rf "${BASEDIR}/openwrt"; }
+
+say "Cloning openwrt"
 git clone https://git.openwrt.org/openwrt/openwrt.git
 cd openwrt
 git fetch -t
-git checkout v21.02.3
+say "Checking out OpenWRT ${OPENWRT_VERSION}"
+git checkout v${OPENWRT_VERSION}
+
+./scripts/feeds update -a
+./scripts/feeds install -a
 
 if [ -d "${BASEDIR}/patches" ]; then
     for patch in $(find "${BASEDIR}/patches" -type f -name '*.patch'); do
+        say "Applying patch ${patch}"
         patch -p1 < "${patch}"
     done
 fi
 
-cp -R ${BASEDIR}/files .
+[ -d "${BASEDIR}/files" ] && { cp -R "${BASEDIR}/files/" "${BASEDIR}/openwrt/"; } || { say "No files directory found"; exit 1; }
 
-wget https://downloads.openwrt.org/releases/21.02.3/targets/rockchip/armv8/config.buildinfo -O .config
+say "Fetching our .config"
+wget https://downloads.openwrt.org/releases/"${OPENWRT_VERSION}"/targets/rockchip/armv8/config.buildinfo -O .config
 
+say "Fixing our our .config"
 PACKAGES="kmod-rt2800-usb rt2800-usb-firmware kmod-cfg80211 kmod-lib80211 kmod-mac80211 kmod-rtl8192cu \
             docker docker-compose dockerd luci-app-dockerman luci-lib-docker \
             base-files block-mount fdisk luci-app-minidlna minidlna samba4-server \
@@ -40,6 +72,7 @@ PACKAGES="kmod-rt2800-usb rt2800-usb-firmware kmod-cfg80211 kmod-lib80211 kmod-m
             adblock luci-app-adblock kmod-usb-net-asix-ax88179"
 
 for PACKAGE in ${PACKAGES}; do
+    #say "Adding ${PACKAGE} to .config"
     echo "CONFIG_PACKAGE_${PACKAGE}=y" >> .config
 done
 
@@ -52,16 +85,18 @@ echo 'CONFIG_TARGET_BOARD="rockchip"' >> .config
 echo 'CONFIG_TARGET_SUBTARGET="armv8"' >> .config
 echo 'CONFIG_TARGET_PROFILE="DEVICE_radxa_rock-pi-4"' >> .config
 echo 'CONFIG_TARGET_ARCH_PACKAGES="aarch64_generic"' >> .config
-echo 'CONFIG_TARGET_ROOTFS_EXT4FS=y' >> .config
+echo 'CONFIG_TARGET_ROOTFS_EXT4FS=n' >> .config
 echo 'CONFIG_TARGET_IMAGES_GZIP=y' >> .config
 echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=y' >> .config
+echo 'CONFIG_IB=n' >> .config
+echo 'CONFIG_SDK=n' >> .config
 
 sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
-./scripts/feeds update -a
-./scripts/feeds install -a
-
 make defconfig
+
+# If we are just testing, do not actually build, just exit
+[ -z "${TESTING}" ] || { exit 0; }
 
 make download V=s
 
@@ -73,7 +108,3 @@ make toolchain/install -j$(nproc) V=s || \
 
 make -j$(nproc) V=s || \
     make V=s    
-
-#make -j $(nproc) world
-
-
