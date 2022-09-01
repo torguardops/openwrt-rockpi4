@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 BASEDIR="${PWD}"
-TESTING=1
 OPENWRT_VERSION='21.02.3'
 
 # Bash Color mapping
@@ -95,16 +94,10 @@ sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
 make defconfig
 
-# If we are just testing, do not actually build, just exit
-[ -z "${TESTING}" ] || { exit 0; }
-
 make download V=s
 
-make tools/install -j$(nproc) V=s || \
-    make tools/install V=s
+make tools/install -j$(nproc) V=s
 
-make toolchain/install -j$(nproc) V=s || \
-    make toolchain/install V=s
+make toolchain/install -j$(nproc) V=s
 
-make -j$(nproc) V=s || \
-    make V=s    
+make -j$(nproc) V=s  
