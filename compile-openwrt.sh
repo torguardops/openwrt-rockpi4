@@ -53,8 +53,8 @@ echo 'CONFIG_TARGET_SUBTARGET="armv8"' >> .config
 echo 'CONFIG_TARGET_PROFILE="DEVICE_radxa_rock-pi-4"' >> .config
 echo 'CONFIG_TARGET_ARCH_PACKAGES="aarch64_generic"' >> .config
 echo 'CONFIG_TARGET_ROOTFS_EXT4FS=y' >> .config
-echo 'CONFIG_TARGET_IMAGES_GZIP=n' >> .config
-echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=n' >> .config
+echo 'CONFIG_TARGET_IMAGES_GZIP=y' >> .config
+echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=y' >> .config
 
 sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
