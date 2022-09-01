@@ -15,8 +15,7 @@ if [ -d "${BASEDIR}/patches" ]; then
     done
 fi
 
-./scripts/feeds update -a
-./scripts/feeds install -a
+cp -R ${BASEDIR}/files .
 
 wget https://downloads.openwrt.org/releases/21.02.3/targets/rockchip/armv8/config.buildinfo -O .config
 
@@ -59,11 +58,22 @@ echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=n' >> .config
 
 sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
+./scripts/feeds update -a
+./scripts/feeds install -a
+
 make defconfig
 
-cp -R ${BASEDIR}/files .
+make download V=s
 
-make -j $(nproc) kernel_menuconfig
- 
-# Build the firmware image
-make -j $(nproc) defconfig download clean world V=s
+make tools/install -j$(nproc) V=s || \
+    make tools/install V=s
+
+make toolchain/install -j$(nproc) V=s || \
+    make toolchain/install V=s
+
+make -j$(nproc) V=s || \
+    make V=s    
+
+#make -j $(nproc) world
+
+
