@@ -94,10 +94,10 @@ sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
 make defconfig
 
-make download V=s
+make download
 
-make tools/install -j$(nproc) V=s
+make tools/install -j$(nproc)
 
-make toolchain/install -j$(nproc) V=s
+make toolchain/install -j$(nproc)
 
-make -j$(nproc) V=s  
+make -j$(nproc)
