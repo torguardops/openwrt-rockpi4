@@ -103,7 +103,7 @@ echo 'CONFIG_TARGET_ROOTFS_EXT4FS=n' >> .config
 echo 'CONFIG_TARGET_IMAGES_GZIP=n' >> .config
 echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=y' >> .config
 
-sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
+#sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
 make defconfig
 
