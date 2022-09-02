@@ -34,21 +34,16 @@ git fetch -t
 say "Checking out OpenWRT ${OPENWRT_VERSION}"
 git checkout v${OPENWRT_VERSION}
 
-say "Fing feeds.conf.default"
+say "Creating our own feeds.conf"
 # Fix the contents of feeds.conf.default to fix some compile problems
-cat << EOF > feeds.conf.default
+cat << EOF > feeds.conf
 src-git-full packages https://git.openwrt.org/feed/packages.git;openwrt-21.02
 src-git-full luci https://git.openwrt.org/project/luci.git;openwrt-21.02
 src-git-full routing https://git.openwrt.org/feed/routing.git;openwrt-21.02
 src-git-full telephony https://git.openwrt.org/feed/telephony.git;openwrt-21.02
 EOF
 
-# Fix a compile problem with python-cryptography in packages
-# This must be ran before we update our package feeds to set the right commit!
-# https://github.com/openwrt/packages/pull/18883/commits/9e3b7d78837b7181b859472894aa243a2eae595b
-# sed -i "s#src-git packages https://git.openwrt.org/feed/packages.git^78bcd00c13587571b5c79ed2fc3363aa674aaef7#src-git-full packages https://git.openwrt.org/feed/packages.git;openwrt-21.02#g" feeds.conf.default
-
-say "Updating and installing feeds"
+say "Updating and Installing Feeds"
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
@@ -121,6 +116,7 @@ echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=y' >> .config
 
 sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
+say "Running make defconfig to generate .config"
 make defconfig
 
 # make download
@@ -129,4 +125,5 @@ make defconfig
 
 # make toolchain/install -j$(nproc)
 
+say "Running the actual make process with $(nproc) processors"
 make -j$(nproc)
