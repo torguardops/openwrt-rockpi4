@@ -34,14 +34,25 @@ git fetch -t
 say "Checking out OpenWRT ${OPENWRT_VERSION}"
 git checkout v${OPENWRT_VERSION}
 
+say "Fing feeds.conf.default"
+# Fix the contents of feeds.conf.default to fix some compile problems
+cat << EOF > feeds.conf.default
+src-git-full packages https://git.openwrt.org/feed/packages.git;openwrt-21.02
+src-git-full luci https://git.openwrt.org/project/luci.git;openwrt-21.02
+src-git-full routing https://git.openwrt.org/feed/routing.git;openwrt-21.02
+src-git-full telephony https://git.openwrt.org/feed/telephony.git;openwrt-21.02
+EOF
+
 # Fix a compile problem with python-cryptography in packages
 # This must be ran before we update our package feeds to set the right commit!
 # https://github.com/openwrt/packages/pull/18883/commits/9e3b7d78837b7181b859472894aa243a2eae595b
-sed -i "s#src-git packages https://git.openwrt.org/feed/packages.git^78bcd00c13587571b5c79ed2fc3363aa674aaef7#src-git-full packages https://git.openwrt.org/feed/packages.git;openwrt-21.02#g" feeds.conf.default
+# sed -i "s#src-git packages https://git.openwrt.org/feed/packages.git^78bcd00c13587571b5c79ed2fc3363aa674aaef7#src-git-full packages https://git.openwrt.org/feed/packages.git;openwrt-21.02#g" feeds.conf.default
 
+say "Updating and installing feeds"
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
+say "Running Patches"
 if [ -d "${BASEDIR}/patches" ]; then
     for patch in $(find "${BASEDIR}/patches" -type f -name '*.patch'); do
         say "Applying patch ${patch}"
@@ -49,7 +60,7 @@ if [ -d "${BASEDIR}/patches" ]; then
     done
 fi
 
-[ -d "${BASEDIR}/files" ] && { cp -R "${BASEDIR}/files/" "${BASEDIR}/openwrt/"; } || { say "No files directory found"; exit 1; }
+[ -d "${BASEDIR}/files" ] && { say "Copying our custom files into openwrt folder"; cp -R "${BASEDIR}/files/" "${BASEDIR}/openwrt/"; } || { say "No files directory found"; exit 1; }
 
 say "Fetching our .config"
 wget https://downloads.openwrt.org/releases/"${OPENWRT_VERSION}"/targets/rockchip/armv8/config.buildinfo -O .config
@@ -76,7 +87,7 @@ PACKAGES="kmod-rt2800-usb rt2800-usb-firmware kmod-cfg80211 kmod-lib80211 kmod-m
             adblock luci-app-adblock kmod-usb-net-asix-ax88179"
 
 for PACKAGE in ${PACKAGES}; do
-    #say "Adding ${PACKAGE} to .config"
+    say "Adding ${PACKAGE} to .config"
     echo "CONFIG_PACKAGE_${PACKAGE}=y" >> .config
 done
 
