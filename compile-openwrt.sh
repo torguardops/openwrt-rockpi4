@@ -75,6 +75,21 @@ for PACKAGE in ${PACKAGES}; do
     echo "CONFIG_PACKAGE_${PACKAGE}=y" >> .config
 done
 
+# echo 'CONFIG_TARGET_KERNEL_PARTSIZE=1000' >> .config
+# echo 'CONFIG_TARGET_ROOTFS_PARTSIZE=13000' >> .config
+# echo 'CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-pi-4=y' >> .config
+# echo 'CONFIG_HAS_SUBTARGETS=y' >> .config
+# echo 'CONFIG_HAS_DEVICES=y' >> .config
+# echo 'CONFIG_TARGET_BOARD="rockchip"' >> .config
+# echo 'CONFIG_TARGET_SUBTARGET="armv8"' >> .config
+# echo 'CONFIG_TARGET_PROFILE="DEVICE_radxa_rock-pi-4"' >> .config
+# echo 'CONFIG_TARGET_ARCH_PACKAGES="aarch64_generic"' >> .config
+# echo 'CONFIG_TARGET_ROOTFS_EXT4FS=n' >> .config
+# echo 'CONFIG_TARGET_IMAGES_GZIP=y' >> .config
+# echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=y' >> .config
+# echo 'CONFIG_IB=n' >> .config
+# echo 'CONFIG_SDK=n' >> .config
+
 echo 'CONFIG_TARGET_KERNEL_PARTSIZE=1000' >> .config
 echo 'CONFIG_TARGET_ROOTFS_PARTSIZE=13000' >> .config
 echo 'CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-pi-4=y' >> .config
@@ -85,10 +100,8 @@ echo 'CONFIG_TARGET_SUBTARGET="armv8"' >> .config
 echo 'CONFIG_TARGET_PROFILE="DEVICE_radxa_rock-pi-4"' >> .config
 echo 'CONFIG_TARGET_ARCH_PACKAGES="aarch64_generic"' >> .config
 echo 'CONFIG_TARGET_ROOTFS_EXT4FS=n' >> .config
-echo 'CONFIG_TARGET_IMAGES_GZIP=y' >> .config
+echo 'CONFIG_TARGET_IMAGES_GZIP=n' >> .config
 echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=y' >> .config
-echo 'CONFIG_IB=n' >> .config
-echo 'CONFIG_SDK=n' >> .config
 
 sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
