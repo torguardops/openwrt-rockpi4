@@ -34,6 +34,11 @@ git fetch -t
 say "Checking out OpenWRT ${OPENWRT_VERSION}"
 git checkout v${OPENWRT_VERSION}
 
+# Fix a compile problem with python-cryptography in packages
+# This must be ran before we update our package feeds to set the right commit!
+# https://github.com/openwrt/packages/pull/18883/commits/9e3b7d78837b7181b859472894aa243a2eae595b
+sed -i "s#https://git.openwrt.org/feed/packages.git^78bcd00c13587571b5c79ed2fc3363aa674aaef7#https://git.openwrt.org/feed/packages.git^9e3b7d78837b7181b859472894aa243a2eae595b#g" feeds.conf.default
+
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
@@ -103,7 +108,7 @@ echo 'CONFIG_TARGET_ROOTFS_EXT4FS=n' >> .config
 echo 'CONFIG_TARGET_IMAGES_GZIP=n' >> .config
 echo 'CONFIG_TARGET_ROOTFS_SQUASHFS=y' >> .config
 
-#sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
+sed -i "s/CONFIG_TARGET_MULTI_PROFILE=y/CONFIG_TARGET_MULTI_PROFILE=n/g" .config
 
 make defconfig
 
