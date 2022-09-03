@@ -41,6 +41,15 @@ git fetch -t
 say "Checking out OpenWRT ${OPENWRT_VERSION}"
 git checkout v${OPENWRT_VERSION}
 
+# If we have any patches to install, do it now
+say "Running Patches"
+if [ -d "${BASEDIR}/patches" ]; then
+    for patch in $(find "${BASEDIR}/patches" -type f -name '*.patch'); do
+        say "Applying patch ${patch}"
+        patch -p1 < "${patch}"
+    done
+fi
+
 # Create our feeds.conf to use the one always up to date
 say "Creating our own feeds.conf"
 cat << EOF > feeds.conf
@@ -54,15 +63,6 @@ EOF
 say "Updating and Installing Feeds"
 ./scripts/feeds update -a
 ./scripts/feeds install -a
-
-# If we have any patches to install, do it now
-say "Running Patches"
-if [ -d "${BASEDIR}/patches" ]; then
-    for patch in $(find "${BASEDIR}/patches" -type f -name '*.patch'); do
-        say "Applying patch ${patch}"
-        patch -p1 < "${patch}"
-    done
-fi
 
 # Copy in the custom files directory if it exists - this adds our scripts and files to openwrt
 [ -d "${BASEDIR}/files" ] && { say "Copying our custom files into openwrt folder"; cp -R "${BASEDIR}/files/" "${BASEDIR}/openwrt/"; } || { say "No files directory found"; exit 1; }
@@ -86,8 +86,6 @@ CONFIG_TARGET_ARCH_PACKAGES="aarch64_generic"
 CONFIG_TARGET_ROOTFS_EXT4FS=n
 CONFIG_TARGET_IMAGES_GZIP=n
 CONFIG_TARGET_ROOTFS_SQUASHFS=y
-CONFIG_IB=n
-CONFIG_SDK=n
 EOF
 
 # Write the packages we want to install to the .config
